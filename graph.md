@@ -101,3 +101,15 @@ public:
 };
 
 ```
+
+# Floyd算法
+
+Floyd-Warshall算法的原理是动态规划。
+
+设{\displaystyle D_{i,j,k}}D_{{i,j,k}}为从{\displaystyle i}i到{\displaystyle j}j的只以{\displaystyle (1..k)}(1..k)集合中的节点为中间节点的最短路径的长度。
+
+若最短路径经过点k，则{\displaystyle D_{i,j,k}=D_{i,k,k-1}+D_{k,j,k-1}}D_{{i,j,k}}=D_{{i,k,k-1}}+D_{{k,j,k-1}}；
+若最短路径不经过点k，则{\displaystyle D_{i,j,k}=D_{i,j,k-1}}D_{{i,j,k}}=D_{{i,j,k-1}}。
+因此，{\displaystyle D_{i,j,k}={\mbox{min}}(D_{i,j,k-1},D_{i,k,k-1}+D_{k,j,k-1})}D_{{i,j,k}}={\mbox{min}}(D_{{i,j,k-1}},D_{{i,k,k-1}}+D_{{k,j,k-1}})。
+
+在实际算法中，为了节约空间，可以直接在原来空间上进行迭代，这样空间可降至二维。
