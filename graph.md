@@ -104,12 +104,75 @@ public:
 
 # Floyd算法
 
-Floyd-Warshall算法的原理是动态规划。
+Floyd算法又称插点法，其中算法的核心思想是动态规划。
 
-设{\displaystyle D_{i,j,k}}D_{{i,j,k}}为从{\displaystyle i}i到{\displaystyle j}j的只以{\displaystyle (1..k)}(1..k)集合中的节点为中间节点的最短路径的长度。
+## 算法步骤
 
-若最短路径经过点k，则{\displaystyle D_{i,j,k}=D_{i,k,k-1}+D_{k,j,k-1}}D_{{i,j,k}}=D_{{i,k,k-1}}+D_{{k,j,k-1}}；
-若最短路径不经过点k，则{\displaystyle D_{i,j,k}=D_{i,j,k-1}}D_{{i,j,k}}=D_{{i,j,k-1}}。
-因此，{\displaystyle D_{i,j,k}={\mbox{min}}(D_{i,j,k-1},D_{i,k,k-1}+D_{k,j,k-1})}D_{{i,j,k}}={\mbox{min}}(D_{{i,j,k-1}},D_{{i,k,k-1}}+D_{{k,j,k-1}})。
+通过已知条件初始化距离矩阵D[n][n]，其中D[i][j]表示，顶点i到顶点j的距离。
 
-在实际算法中，为了节约空间，可以直接在原来空间上进行迭代，这样空间可降至二维。
+n个顶点依次作为插入点，例如，k为其中一个顶点，D[i][k] + D[k][j] < D[i][j]，那说明顶点i**经过**顶点k再到达j，比直接到达j要近。所以更新D[i][j]：D[i][j] = D[i][k] + D[k][j]。
+
+可以归纳得到状态转移方程：D[i][j] = min(D[i,k]+D[k,j],D[i,j]);
+
+## Floyd核心代码：
+
+```C++
+// Floyd算法
+for (int k = 0; k < n; k++) {
+// n个顶点依次作为插入点
+// 注意插点k是放在第一层循环，后面会解释原因
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            // 遍历各个顶点之间的距离，并用插入点进行更新
+            D[i][j] = min(D[i][k]+D[k][j], D[i][j]);
+        }
+    }
+}
+```
+
+## 1334. 阈值距离内邻居最少的城市
+
+```C++
+class Solution {
+public:
+    int findTheCity(int n, vector<vector<int>>& edges, int distanceThreshold) {
+        vector<vector<int>> distance(n, vector<int>(n, INT_MAX));
+        for(auto& e: edges){
+            distance[e[0]][e[1]] = e[2];
+            distance[e[1]][e[0]] = e[2];
+        }
+        for (int k = 0; k < n; k++) {
+
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    // 遍历各个顶点之间的距离，并用插入点进行更新
+                    if (i == j || distance[i][k] == INT_MAX || distance[k][j] == INT_MAX) {
+                            // 这些情况都不符合下一行的if条件，
+                            // 单独拿出来只是为了防止两个INT_MAX相加导致溢出
+                            continue;
+                        }
+                    distance[i][j] = min(distance[i][k]+distance[k][j], distance[i][j]);
+                }
+            }
+        }
+         // 选择出能到达其它城市最少的城市ret
+        int ret;
+        int minNum = INT_MAX;
+        for (int i = 0; i < n; i++) {
+            int cnt = 0;
+            for (int j = 0; j < n; j++) {
+                if (i != j && distance[i][j] <= distanceThreshold) {
+                    cnt++;
+                }
+            }
+            if (cnt <= minNum) {
+                minNum = cnt;
+                ret = i;
+            }
+        }
+        return ret;
+    }
+    
+};
+
+```
